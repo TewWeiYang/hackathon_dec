@@ -1,11 +1,176 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collectible Puzzle System</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 10px;
+  background: #f7f7f7;
+  text-align: center;
+}
+
+/* ---- 棋盘 ---- */
+.board-wrapper {
+  overflow-x: auto;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(30px, 1fr));
+  gap: 4px;
+  max-width: 360px;
+  margin: 10px auto;
+}
+
+.cell {
+  aspect-ratio: 1/1;
+  background: white;
+  border: 1px solid #bbb;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.active {
+  background: gold;
+  font-weight: bold;
+}
+
+.gift {
+  background: #ffe0e0;
+  border: 2px solid #ff6b6b;
+}
+
+/* ---- 控制 ---- */
+button {
+  padding: 12px 20px;
+  font-size: 16px;
+  margin-top: 10px;
+  width: 90%;
+  max-width: 300px;
+}
+
+/* ---- 拼图 ---- */
+.puzzles {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.puzzle {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #333;
+  margin: 5px;
+  background-image: url("puzzle.jpg"); /* ← 换图 */
+  background-size: 200% 200%;
+  filter: grayscale(100%);
+}
+
+.puzzle.done {
+  filter: none;
+}
+
+/* 四块拼图定位 */
+.p1 { background-position: 0% 0%; }
+.p2 { background-position: 100% 0%; }
+.p3 { background-position: 0% 100%; }
+.p4 { background-position: 100% 100%; }
+
+.info {
+  font-size: 14px;
+}
+</style>
 </head>
+
 <body>
-    
+
+<h2>Collectible Puzzle System</h2>
+
+<div class="board-wrapper">
+  <div class="board" id="board"></div>
+</div>
+
+<button onclick="gainPoint()">Collect Points</button>
+
+<div class="info">
+  Current Steps: <span id="step">0</span> / 100<br>
+  Puzzle Progress: <span id="puzzleCount">0</span> / 4
+</div>
+
+<div class="puzzles">
+  <div class="puzzle p1" id="pz1"></div>
+  <div class="puzzle p2" id="pz2"></div>
+  <div class="puzzle p3" id="pz3"></div>
+  <div class="puzzle p4" id="pz4"></div>
+</div>
+
+<script>
+let currentStep = 0;
+let puzzleCount = 0;
+
+const giftSteps = [25, 50, 75];
+const board = document.getElementById("board");
+
+/* 生成棋盘 */
+for (let i = 1; i <= 100; i++) {
+  const c = document.createElement("div");
+  c.className = "cell";
+  c.textContent = i;
+  c.id = "cell-" + i;
+
+  if (giftSteps.includes(i)) {
+    c.classList.add("gift");
+  }
+
+  board.appendChild(c);
+}
+
+function gainPoint() {
+  if (puzzleCount === 4) {
+    alert("🎉 活动已完成！");
+    return;
+  }
+
+  if (currentStep > 0) {
+    document.getElementById("cell-" + currentStep).classList.remove("active");
+  }
+
+  currentStep++;
+
+  if (giftSteps.includes(currentStep)) {
+    alert("🎁 恭喜！你领取了礼物！");
+  }
+
+  // 达 100 步
+  if (currentStep === 100) {
+    puzzleCount++;
+    document.getElementById("pz" + puzzleCount).classList.add("done");
+    alert("🧩 获得一块拼图！");
+    currentStep = 0;
+  } else {
+    document.getElementById("cell-" + currentStep).classList.add("active");
+  }
+
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById("step").innerText = currentStep;
+  document.getElementById("puzzleCount").innerText = puzzleCount;
+
+  if (puzzleCount === 4) {
+    alert("🏆 拼图完成！解锁最终大图！");
+  }
+}
+</script>
+
 </body>
 </html>
