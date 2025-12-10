@@ -9,18 +9,17 @@
 <body>
 
 <div class="map">
-  <!-- tiles -->
-  <div class="tile" style="top:0; left:0;"></div>
-  <div class="tile" style="top:0; left:120px;"></div>
-  <div class="tile" style="top:0; left:240px;"></div>
-  <div class="tile" style="top:120px; left:240px;"></div>
-  <div class="tile" style="top:240px; left:240px;"></div>
+  <div class="tile house" style="top:0; left:0;">🏠</div>
+  <div class="tile gift" style="top:0; left:120px;">🎁</div>
+  <div class="tile quiz" style="top:0; left:240px;">❓</div>
+  <div class="tile money" style="top:120px; left:240px;">💰</div>
+  <div class="tile normal" style="top:240px; left:240px;"></div>
 
-  <!-- player -->
   <div id="player"></div>
 </div>
 
-<button onclick="movePlayer()">Move</button>
+<button onclick="rollDice()">🎲 Roll Dice</button>
+<button onclick="movePlayer()">➡ Move</button>
 
 <script src="script.js"></script>
 </body>
