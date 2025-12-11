@@ -420,53 +420,45 @@ header {
 
 <!-- JS -->
 <script>
-  let points = 0;
-  let currentStep = 0;
-  let puzzleCount = 0;
-  const costPerStep = 10;
+/* -------------------------------------
+      LOAD POINTS FROM STORAGE
+-------------------------------------- */
+let points = parseInt(localStorage.getItem("ecoPoints") || "0");
+let currentStep = 0;
+let puzzleCount = 0;
+const costPerStep = 10;
 
-  // ✅ 现在只有 25 & 75 会弹 reward
-  const giftSteps = [25, 75];
+/* DOM ELEMENTS */
+const pointsEl = document.getElementById("points");
+const stepEl = document.getElementById("steps");
+const car = document.getElementById("car");
+const rewardOverlay = document.getElementById("rewardOverlay");
+const rewardMsg = document.getElementById("rewardMsg");
 
-  // 每个礼物点显示的内容（文字也改成显示加多少分）
-  const giftRewards = {
-    25: {
-      icon: "🎁",
-      title: "First Reward",
-      desc: "You reached Step 25! Bonus +100 Eco Points have been added."
-    },
-    75: {
-      icon: "🏆",
-      title: "Second Reward",
-      desc: "You reached Step 75! Bonus +200 Eco Points have been added."
-    }
-  };
+/* INITIAL UI UPDATE */
+updateUI();
 
-  const pointsEl = document.getElementById("points");
-  const stepEl = document.getElementById("step");
-  const puzzleCountEl = document.getElementById("puzzleCount");
+/* -------------------------------------
+            UPDATE SCREEN UI
+-------------------------------------- */
+function updateUI() {
+  pointsEl.textContent = points;
+  stepEl.textContent = currentStep;
+}
 
-  const svg = document.getElementById("gameSvg");
-  const path = document.getElementById("road");
-  const car = document.getElementById("car");
-  const smokeLayer = document.getElementById("smokeLayer");
-  const giftMarkersLayer = document.getElementById("giftMarkers");
-  const pathLength = path.getTotalLength();
+/* Save points permanently */
+function savePoints() {
+  localStorage.setItem("ecoPoints", points);
+}
 
-  // Reward overlay elements
-  const rewardOverlay = document.getElementById("rewardOverlay");
-  const rewardIconEl = document.getElementById("rewardIcon");
-  const rewardTitleEl = document.getElementById("rewardTitle");
-  const rewardDescEl = document.getElementById("rewardDesc");
-  const rewardStepTextEl = document.getElementById("rewardStepText");
-
-  const particles = [];
-  const PARTICLE_LIFETIME = 800; // 毫秒
-
-  function completeTask() {
-    points += 20;
-    updateUI();
-  }
+/* -------------------------------------
+          COMPLETE TASK (+20)
+-------------------------------------- */
+function completeTask() {
+  points += 20;
+  savePoints();
+  updateUI();
+}
 
   function exchangeSteps() {
     if (points < costPerStep) {
@@ -656,6 +648,8 @@ header {
     }
   };
 </script>
+
+
 
 </body>
 </html>

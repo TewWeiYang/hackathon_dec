@@ -58,3 +58,34 @@ window.addEventListener("scroll", () => {
     document.getElementById("foot-events").classList.remove("active");
   }
 });
+
+function attendEvent() {
+  window.location.href = "car_puzzle_reward.html";
+}
+
+// =====================
+// GLOBAL POINT SYSTEM
+// =====================
+function getPoints() {
+    return parseInt(localStorage.getItem("ecoPoints") || "0");
+}
+
+function setPoints(value) {
+    localStorage.setItem("ecoPoints", value);
+}
+
+function addPoints(value) {
+    let current = getPoints();
+    setPoints(current + value);
+}
+
+function attendEvent(eventName) {
+    // Add 20 points for attending event
+    addPoints(20);
+
+    // Save last reward message
+    alert(`You attended ${eventName} and earned +20 Eco Points!`);
+
+    // Redirect to reward popup page
+    window.location.href = "car_puzzle_reward.html";
+}
