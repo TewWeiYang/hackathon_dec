@@ -29,6 +29,18 @@
       font-size: 24px;
     }
 
+    /* Make header title (Eco Rewards) always white */
+    .left-title h1 a,
+    .left-title h1 a:visited {
+    color: #ffffff !important;
+    text-decoration: none;
+    }
+
+    .left-title h1 a:hover {
+    color: #ffffff !important;
+    text-decoration: underline;
+    }
+
     .logo-center {
       flex: 1;
       display: flex;
@@ -220,7 +232,7 @@
 
 <header>
   <div class="left-title">
-    <h1>Eco Rewards</h1>
+    <h1><a href="home.html">Eco Rewards</a></h1>
   </div>
 
   <div class="logo-center">
@@ -229,8 +241,8 @@
   </div>
 
   <nav class="right-nav">
-    <a href="index.html">Home</a>
-    <a href="how-to-use.html">How It Works</a>
+    <a href="home.html">Home</a>
+    <a href="works.html">How It Works</a>
     <a href="sendemail+otp.html">Login</a>
   </nav>
 </header>
