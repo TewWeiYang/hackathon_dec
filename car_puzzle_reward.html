@@ -14,7 +14,7 @@ body {
   color: #333;
 }
 
-/* UI Header */
+/* UI Header (page hero text) */
 .hero { padding: 24px 16px 10px; }
 .hero h1 { margin: 0; font-size: 28px; }
 .hero p { margin-top: 6px; font-size: 14px; color: #666; }
@@ -99,7 +99,7 @@ button.secondary {
   display: none;          /* 默认隐藏 */
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 900;
 }
 .reward-card {
   background: #fff;
@@ -140,10 +140,115 @@ button.secondary {
   cursor: pointer;
   width: 100%;
 }
+
+/* ===== NAV BAR ===== */
+
+/* Header Container */
+header {
+  background: #2e6b41;
+  color: white;
+  padding: 16px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Left Title */
+.left-title {
+  flex: 1;
+  text-align: left;
+}
+.left-title h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Title link always white */
+.left-title h1 a,
+.left-title h1 a:visited {
+  color: #ffffff !important;
+  text-decoration: none;
+}
+.left-title h1 a:hover {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
+
+/* Logo Center */
+.logo-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.nav-logo {
+  height: 65px;
+  width: auto;
+  cursor: pointer;
+}
+
+/* Right Navigation Menu */
+.right-nav { 
+  flex: 1; 
+  text-align: right; 
+}
+.right-nav a {
+  color: white;
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+}
+.right-nav a:hover { 
+  text-decoration: underline; 
+}
+
+/* ===== Logo Popup Modal ===== */
+#logoModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+#logoModal img {
+  max-width: 80%;
+  max-height: 80%;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+#closeLogo {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
 </style>
 </head>
 
 <body>
+
+<!-- NAVBAR -->
+<header>
+  <div class="left-title">
+    <h1><a href="home.html">Eco Rewards</a></h1>
+  </div>
+
+  <div class="logo-center">
+    <img src="logo.png" alt="One Step Save World Logo" class="nav-logo" id="logoBtn">
+  </div>
+
+  <nav class="right-nav">
+    <a href="home.html">Home</a>
+    <a href="works.html">How It Works</a>
+    <a href="sendemail+otp.html">Login</a>
+  </nav>
+</header>
 
 <!-- Title section -->
 <div class="hero">
@@ -161,7 +266,6 @@ button.secondary {
 <!-- Buttons -->
 <button class="secondary" onclick="completeTask()">🎯 Complete Task (+20)</button>
 <button onclick="exchangeSteps()">🚗 Exchange Points → Move</button>
-
 
 <!-- MAP START -->
 <div class="track-wrapper">
@@ -259,6 +363,9 @@ button.secondary {
   <circle cx="360" cy="180" r="20" fill="#ff6a00"/>
   <text x="360" y="185" font-size="20" text-anchor="middle" fill="red">START</text>
 
+  <!-- 礼物位置层（JS 会画 🎁 在这里） -->
+  <g id="giftMarkers"></g>
+
   <!-- 车 + 烟雾容器（车在前，烟雾在后） -->
   <g id="smokeLayer"></g>
 
@@ -284,7 +391,6 @@ button.secondary {
 </div>
 <!-- MAP END -->
 
-
 <!-- Puzzle UI -->
 <div class="puzzles">
   <div class="puzzle p1" id="pz1"></div>
@@ -306,31 +412,33 @@ button.secondary {
   </div>
 </div>
 
+<!-- Logo Popup Modal -->
+<div id="logoModal">
+  <span id="closeLogo">✕</span>
+  <img src="logo.png" alt="Logo Large View">
+</div>
 
-<!-- 纯原生 JS 控制路径 + 小车 + 烟雾粒子 + 礼物弹窗 -->
+<!-- JS -->
 <script>
   let points = 0;
   let currentStep = 0;
   let puzzleCount = 0;
   const costPerStep = 10;
-  const giftSteps = [25, 50, 75];
 
-  // 每个礼物点显示的内容
+  // ✅ 现在只有 25 & 75 会弹 reward
+  const giftSteps = [25, 75];
+
+  // 每个礼物点显示的内容（文字也改成显示加多少分）
   const giftRewards = {
     25: {
       icon: "🎁",
-      title: "Bronze Surprise",
-      desc: "You just reached Step 25! You can unlock a small bonus gift."
-    },
-    50: {
-      icon: "🧩",
-      title: "Puzzle Booster",
-      desc: "Halfway there! This reward can be used to boost your puzzle progress."
+      title: "First Reward",
+      desc: "You reached Step 25! Bonus +100 Eco Points have been added."
     },
     75: {
       icon: "🏆",
-      title: "Golden Reward",
-      desc: "Almost finished! This premium gift can be used for special bonuses."
+      title: "Second Reward",
+      desc: "You reached Step 75! Bonus +200 Eco Points have been added."
     }
   };
 
@@ -342,6 +450,7 @@ button.secondary {
   const path = document.getElementById("road");
   const car = document.getElementById("car");
   const smokeLayer = document.getElementById("smokeLayer");
+  const giftMarkersLayer = document.getElementById("giftMarkers");
   const pathLength = path.getTotalLength();
 
   // Reward overlay elements
@@ -367,15 +476,24 @@ button.secondary {
     points -= costPerStep;
     currentStep++;
 
-    // 礼物点：显示奖励弹窗
+    // 礼物点：显示奖励弹窗（只在 25 & 75）
     if (giftSteps.includes(currentStep)) {
       showReward(currentStep);
     }
 
+    // 跑完一圈：完成 puzzle + 跳去 lucky_draw.html
     if (currentStep === 100) {
       puzzleCount++;
-      document.getElementById("pz" + puzzleCount).classList.add("done");
+      if (puzzleCount <= 4) {
+        document.getElementById("pz" + puzzleCount).classList.add("done");
+      }
       currentStep = 0;
+      updateUI();
+      updateCarPosition(true);
+
+      // ✅ 跳去幸运转盘页面
+      window.location.href = "lucky_draw.html";
+      return;
     }
 
     updateUI();
@@ -464,13 +582,21 @@ button.secondary {
     requestAnimationFrame(updateParticles);
   }
 
-  // 显示礼物弹窗
+  // 显示礼物弹窗 + 加分逻辑
   function showReward(step) {
     const reward = giftRewards[step] || {
       icon: "🎁",
       title: "Special Reward",
       desc: "You just unlocked a special reward!"
     };
+
+    // ✅ 根据 step 加分
+    if (step === 25) {
+      points += 100;
+    } else if (step === 75) {
+      points += 200;
+    }
+    updateUI();  // 立刻更新画面上的 Points
 
     rewardIconEl.textContent = reward.icon;
     rewardTitleEl.textContent = reward.title;
@@ -485,9 +611,50 @@ button.secondary {
     rewardOverlay.style.display = "none";
   }
 
-  // 初始把车放到起点，并启动粒子动画循环
+  // 在地图上，根据路径长度，把 25% / 75% 的位置画出 🎁 图标
+  function placeGiftMarkers() {
+    giftSteps.forEach(step => {
+      const progress = step / 100;
+      const distance = pathLength * progress;
+      const pt = path.getPointAtLength(distance);
+
+      const marker = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      marker.setAttribute("x", pt.x);
+      marker.setAttribute("y", pt.y - 16); // 往上挪一点
+      marker.setAttribute("text-anchor", "middle");
+      marker.setAttribute("font-size", "32");
+      marker.textContent = "🎁";
+
+      giftMarkersLayer.appendChild(marker);
+    });
+  }
+
+  // 初始把车放到起点，并启动粒子动画循环 + 放好礼物位置
   updateCarPosition(false);
+  placeGiftMarkers();
   requestAnimationFrame(updateParticles);
+
+  /* ===== Logo popup control ===== */
+  const logoBtn   = document.getElementById("logoBtn");
+  const logoModal = document.getElementById("logoModal");
+  const closeLogo = document.getElementById("closeLogo");
+
+  // 点击 logo 打开
+  logoBtn.onclick = () => {
+    logoModal.style.display = "flex";
+  };
+
+  // 点 X 关闭
+  closeLogo.onclick = () => {
+    logoModal.style.display = "none";
+  };
+
+  // 点背景关闭
+  logoModal.onclick = (e) => {
+    if (e.target === logoModal) {
+      logoModal.style.display = "none";
+    }
+  };
 </script>
 
 </body>
