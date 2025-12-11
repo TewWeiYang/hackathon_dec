@@ -96,7 +96,7 @@ button.secondary {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.55);
-  display: none;          /* 默认隐藏 */
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 900;
@@ -142,8 +142,6 @@ button.secondary {
 }
 
 /* ===== NAV BAR ===== */
-
-/* Header Container */
 header {
   background: #2e6b41;
   color: white;
@@ -152,18 +150,9 @@ header {
   justify-content: space-between;
   align-items: center;
 }
+.left-title { flex: 1; text-align: left; }
+.left-title h1 { margin: 0; font-size: 24px; }
 
-/* Left Title */
-.left-title {
-  flex: 1;
-  text-align: left;
-}
-.left-title h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-/* Title link always white */
 .left-title h1 a,
 .left-title h1 a:visited {
   color: #ffffff !important;
@@ -174,7 +163,6 @@ header {
   text-decoration: underline;
 }
 
-/* Logo Center */
 .logo-center {
   flex: 1;
   display: flex;
@@ -186,7 +174,6 @@ header {
   cursor: pointer;
 }
 
-/* Right Navigation Menu */
 .right-nav { 
   flex: 1; 
   text-align: right; 
@@ -269,10 +256,8 @@ header {
 
 <!-- MAP START -->
 <div class="track-wrapper">
-
 <svg id="gameSvg" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
 
-  <!-- Gradient background -->
   <defs>
     <linearGradient id="bgGrad" x1="0" x2="0" y1="0" y2="1">
       <stop offset="0%" stop-color="#d7f6b8"/>
@@ -289,24 +274,19 @@ header {
       <stop offset="100%" stop-color="#000" stop-opacity="0"/>
     </linearGradient>
 
-    <!-- 烟雾模糊效果 -->
     <filter id="smokeBlur">
       <feGaussianBlur stdDeviation="4" />
     </filter>
   </defs>
 
-  <!-- Sky -->
   <rect width="1920" height="1080" fill="url(#bgGrad)" />
 
-  <!-- Soft hills -->
   <ellipse cx="500" cy="900" rx="900" ry="300" fill="#b6e29b" />
   <ellipse cx="1400" cy="950" rx="1100" ry="350" fill="#aee092" />
   
-  <!-- River -->
   <path d="M300,1080 C500,700 600,700 900,1080 Z"
         fill="#96d6ff" opacity="0.7"/>
 
-  <!-- ROAD SHADOW -->
   <path d="
         M 360 180
         Q 960 120 1560 180
@@ -320,7 +300,6 @@ header {
         fill="url(#shadowGrad)"
         transform="translate(8,8)" />
 
-  <!-- MAIN ROAD -->
   <path id="road"
         d="
         M 360 180
@@ -338,7 +317,6 @@ header {
         stroke-linecap="round"
         stroke-linejoin="round"/>
 
-  <!-- Trees -->
   <g fill="#6dbc42">
     <circle cx="400" cy="300" r="30"/>
     <circle cx="440" cy="320" r="25"/>
@@ -350,7 +328,6 @@ header {
     <circle cx="820" cy="930" r="25"/>
   </g>
 
-  <!-- Houses -->
   <g fill="#fff" stroke="#e44d4d" stroke-width="4">
     <rect x="300" y="280" width="100" height="80"/>
     <polygon points="300,280 350,220 400,280"/>
@@ -359,27 +336,17 @@ header {
     <polygon points="1500,700 1560,640 1620,700"/>
   </g>
 
-  <!-- Start Marker -->
   <circle cx="360" cy="180" r="20" fill="#ff6a00"/>
   <text x="360" y="185" font-size="20" text-anchor="middle" fill="red">START</text>
 
-  <!-- 礼物位置层（JS 会画 🎁 在这里） -->
   <g id="giftMarkers"></g>
-
-  <!-- 车 + 烟雾容器（车在前，烟雾在后） -->
   <g id="smokeLayer"></g>
 
-  <!-- SVG 矢量小车：以 (0,0) 为中心画 -->
   <g id="car" transform="translate(360 180)">
-    <!-- 车身 -->
     <rect x="-32" y="-14" width="64" height="26" rx="8" fill="#ff4a4a"/>
-    <!-- 车顶 -->
     <rect x="-18" y="-26" width="36" height="16" rx="5" fill="#ffd7d7"/>
-    <!-- 前挡风玻璃 -->
     <rect x="-12" y="-24" width="14" height="12" rx="3" fill="#ffffff" opacity="0.9"/>
-    <!-- 后车窗 -->
     <rect x="2" y="-24" width="14" height="12" rx="3" fill="#ffffff" opacity="0.9"/>
-    <!-- 轮子 -->
     <circle cx="-18" cy="14" r="8" fill="#333"/>
     <circle cx="18" cy="14" r="8" fill="#333"/>
     <circle cx="-18" cy="14" r="4" fill="#999"/>
@@ -387,7 +354,6 @@ header {
   </g>
 
 </svg>
-
 </div>
 <!-- MAP END -->
 
@@ -420,236 +386,241 @@ header {
 
 <!-- JS -->
 <script>
-/* -------------------------------------
-      LOAD POINTS FROM STORAGE
--------------------------------------- */
-let points = parseInt(localStorage.getItem("ecoPoints") || "0");
+/* ---------- STATE & CONSTANTS ---------- */
+// 从 localStorage 读取积分
+let points = parseInt(localStorage.getItem("ecoPoints") || "0", 10);
 let currentStep = 0;
 let puzzleCount = 0;
 const costPerStep = 10;
 
-/* DOM ELEMENTS */
+// 礼物点
+const giftSteps = [25, 75];
+const giftRewards = {
+  25: {
+    icon: "🎁",
+    title: "First Reward",
+    desc: "You reached Step 25! Bonus +100 Eco Points have been added."
+  },
+  75: {
+    icon: "🏆",
+    title: "Second Reward",
+    desc: "You reached Step 75! Bonus +200 Eco Points have been added."
+  }
+};
+
+/* ---------- DOM ELEMENTS ---------- */
 const pointsEl = document.getElementById("points");
-const stepEl = document.getElementById("steps");
+const stepEl = document.getElementById("step");
+const puzzleCountEl = document.getElementById("puzzleCount");
+
+const svg = document.getElementById("gameSvg");
+const path = document.getElementById("road");
 const car = document.getElementById("car");
+const smokeLayer = document.getElementById("smokeLayer");
+const giftMarkersLayer = document.getElementById("giftMarkers");
+const pathLength = path.getTotalLength();
+
 const rewardOverlay = document.getElementById("rewardOverlay");
-const rewardMsg = document.getElementById("rewardMsg");
+const rewardIconEl = document.getElementById("rewardIcon");
+const rewardTitleEl = document.getElementById("rewardTitle");
+const rewardDescEl = document.getElementById("rewardDesc");
+const rewardStepTextEl = document.getElementById("rewardStepText");
 
-/* INITIAL UI UPDATE */
-updateUI();
+const particles = [];
+const PARTICLE_LIFETIME = 800; // 毫秒
 
-/* -------------------------------------
-            UPDATE SCREEN UI
--------------------------------------- */
+/* ---------- HELPERS ---------- */
+function savePoints() {
+  localStorage.setItem("ecoPoints", String(points));
+}
+
 function updateUI() {
   pointsEl.textContent = points;
   stepEl.textContent = currentStep;
+  puzzleCountEl.textContent = puzzleCount;
 }
 
-/* Save points permanently */
-function savePoints() {
-  localStorage.setItem("ecoPoints", points);
-}
+/* 初始 UI */
+updateUI();
 
-/* -------------------------------------
-          COMPLETE TASK (+20)
--------------------------------------- */
+/* ---------- TASK / STEP LOGIC ---------- */
 function completeTask() {
   points += 20;
   savePoints();
   updateUI();
 }
 
-  function exchangeSteps() {
-    if (points < costPerStep) {
-      alert("Not enough points!");
-      return;
+function exchangeSteps() {
+  if (points < costPerStep) {
+    alert("Not enough points!");
+    return;
+  }
+  points -= costPerStep;
+  savePoints();
+
+  currentStep++;
+
+  if (giftSteps.includes(currentStep)) {
+    showReward(currentStep);
+  }
+
+  if (currentStep === 100) {
+    puzzleCount++;
+    if (puzzleCount <= 4) {
+      document.getElementById("pz" + puzzleCount).classList.add("done");
     }
-    points -= costPerStep;
-    currentStep++;
-
-    // 礼物点：显示奖励弹窗（只在 25 & 75）
-    if (giftSteps.includes(currentStep)) {
-      showReward(currentStep);
-    }
-
-    // 跑完一圈：完成 puzzle + 跳去 lucky_draw.html
-    if (currentStep === 100) {
-      puzzleCount++;
-      if (puzzleCount <= 4) {
-        document.getElementById("pz" + puzzleCount).classList.add("done");
-      }
-      currentStep = 0;
-      updateUI();
-      updateCarPosition(true);
-
-      // ✅ 跳去幸运转盘页面
-      window.location.href = "lucky_draw.html";
-      return;
-    }
-
+    currentStep = 0;
     updateUI();
-    updateCarPosition(true); // true = 产生烟雾
+    updateCarPosition(true);
+
+    // 跑完一圈 → 去幸运转盘
+    window.location.href = "lucky_draw.html";
+    return;
   }
 
-  function updateUI() {
-    pointsEl.textContent = points;
-    stepEl.textContent = currentStep;
-    puzzleCountEl.textContent = puzzleCount;
+  updateUI();
+  updateCarPosition(true);
+}
+
+/* ---------- CAR & SMOKE ---------- */
+function updateCarPosition(spawnSmokeFlag) {
+  const progress = currentStep / 100;
+  const distance = pathLength * progress;
+  const pt = path.getPointAtLength(distance);
+
+  car.setAttribute("transform", `translate(${pt.x} ${pt.y})`);
+
+  if (spawnSmokeFlag) {
+    const prevDist = Math.max(0, distance - 20);
+    const prevPt = path.getPointAtLength(prevDist);
+
+    const dx = pt.x - prevPt.x;
+    const dy = pt.y - prevPt.y;
+    const len = Math.sqrt(dx*dx + dy*dy) || 1;
+    const nx = dx / len;
+    const ny = dy / len;
+
+    const smokeX = pt.x - nx * 40;
+    const smokeY = pt.y - ny * 40;
+
+    spawnSmoke(smokeX, smokeY);
+  }
+}
+
+function spawnSmoke(x, y) {
+  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const jitterX = (Math.random() - 0.5) * 20;
+  const jitterY = (Math.random() - 0.5) * 10;
+
+  circle.setAttribute("cx", x + jitterX);
+  circle.setAttribute("cy", y + jitterY);
+  circle.setAttribute("r", 6);
+  circle.setAttribute("fill", "#ffffff");
+  circle.setAttribute("opacity", "0.7");
+  circle.setAttribute("filter", "url(#smokeBlur)");
+
+  smokeLayer.appendChild(circle);
+
+  particles.push({
+    el: circle,
+    start: performance.now()
+  });
+}
+
+function updateParticles(timestamp) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    const age = timestamp - p.start;
+    if (age >= PARTICLE_LIFETIME) {
+      if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
+      particles.splice(i, 1);
+      continue;
+    }
+
+    const t = age / PARTICLE_LIFETIME;
+    const newR = 6 + t * 14;
+    const newOpacity = 0.7 * (1 - t);
+
+    p.el.setAttribute("r", newR);
+    p.el.setAttribute("opacity", newOpacity);
+
+    const cy = parseFloat(p.el.getAttribute("cy"));
+    p.el.setAttribute("cy", cy - 0.4);
   }
 
-  // 在路径上根据 currentStep 定位小车 + 产生烟雾
-  function updateCarPosition(spawnSmokeFlag) {
-    const progress = currentStep / 100;      // 0 ~ 1
+  requestAnimationFrame(updateParticles);
+}
+
+/* ---------- REWARD POPUP ---------- */
+function showReward(step) {
+  const reward = giftRewards[step] || {
+    icon: "🎁",
+    title: "Special Reward",
+    desc: "You just unlocked a special reward!"
+  };
+
+  if (step === 25) {
+    points += 100;
+  } else if (step === 75) {
+    points += 200;
+  }
+  savePoints();
+  updateUI();
+
+  rewardIconEl.textContent = reward.icon;
+  rewardTitleEl.textContent = reward.title;
+  rewardDescEl.textContent = reward.desc;
+  rewardStepTextEl.textContent = `Step ${step}`;
+
+  rewardOverlay.style.display = "flex";
+}
+
+function closeReward() {
+  rewardOverlay.style.display = "none";
+}
+
+/* ---------- GIFT MARKERS ON MAP ---------- */
+function placeGiftMarkers() {
+  giftSteps.forEach(step => {
+    const progress = step / 100;
     const distance = pathLength * progress;
     const pt = path.getPointAtLength(distance);
 
-    // 小车平移到路径点（车本身是以0,0为中心画的）
-    car.setAttribute("transform", `translate(${pt.x} ${pt.y})`);
+    const marker = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    marker.setAttribute("x", pt.x);
+    marker.setAttribute("y", pt.y - 16);
+    marker.setAttribute("text-anchor", "middle");
+    marker.setAttribute("font-size", "32");
+    marker.textContent = "🎁";
 
-    if (spawnSmokeFlag) {
-      // 计算路径方向向量（用前一个点粗略算方向）
-      const prevDist = Math.max(0, distance - 20);
-      const prevPt = path.getPointAtLength(prevDist);
+    giftMarkersLayer.appendChild(marker);
+  });
+}
 
-      const dx = pt.x - prevPt.x;
-      const dy = pt.y - prevPt.y;
-      const len = Math.sqrt(dx*dx + dy*dy) || 1;
-      const nx = dx / len;
-      const ny = dy / len;
+/* 初始位置 / 粒子动画 / 礼物标记 */
+updateCarPosition(false);
+placeGiftMarkers();
+requestAnimationFrame(updateParticles);
 
-      // 在小车后面一点点的位置喷烟（反方向）
-      const smokeX = pt.x - nx * 40;
-      const smokeY = pt.y - ny * 40;
+/* ---------- Logo popup control ---------- */
+const logoBtn   = document.getElementById("logoBtn");
+const logoModal = document.getElementById("logoModal");
+const closeLogo = document.getElementById("closeLogo");
 
-      spawnSmoke(smokeX, smokeY);
-    }
-  }
+logoBtn.onclick = () => {
+  logoModal.style.display = "flex";
+};
 
-  // 生成一颗烟雾粒子
-  function spawnSmoke(x, y) {
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    const jitterX = (Math.random() - 0.5) * 20; // 随机抖动
-    const jitterY = (Math.random() - 0.5) * 10;
+closeLogo.onclick = () => {
+  logoModal.style.display = "none";
+};
 
-    circle.setAttribute("cx", x + jitterX);
-    circle.setAttribute("cy", y + jitterY);
-    circle.setAttribute("r", 6);
-    circle.setAttribute("fill", "#ffffff");
-    circle.setAttribute("opacity", "0.7");
-    circle.setAttribute("filter", "url(#smokeBlur)");
-
-    smokeLayer.appendChild(circle);
-
-    particles.push({
-      el: circle,
-      start: performance.now()
-    });
-  }
-
-  // 粒子动画循环
-  function updateParticles(timestamp) {
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      const age = timestamp - p.start;
-      if (age >= PARTICLE_LIFETIME) {
-        // 删除粒子
-        if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
-        particles.splice(i, 1);
-        continue;
-      }
-
-      const t = age / PARTICLE_LIFETIME; // 0~1
-      const newR = 6 + t * 14;           // 半径变大
-      const newOpacity = 0.7 * (1 - t);  // 逐渐透明
-
-      p.el.setAttribute("r", newR);
-      p.el.setAttribute("opacity", newOpacity);
-
-      // 轻微往上飘
-      const cy = parseFloat(p.el.getAttribute("cy"));
-      p.el.setAttribute("cy", cy - 0.4);
-    }
-
-    requestAnimationFrame(updateParticles);
-  }
-
-  // 显示礼物弹窗 + 加分逻辑
-  function showReward(step) {
-    const reward = giftRewards[step] || {
-      icon: "🎁",
-      title: "Special Reward",
-      desc: "You just unlocked a special reward!"
-    };
-
-    // ✅ 根据 step 加分
-    if (step === 25) {
-      points += 100;
-    } else if (step === 75) {
-      points += 200;
-    }
-    updateUI();  // 立刻更新画面上的 Points
-
-    rewardIconEl.textContent = reward.icon;
-    rewardTitleEl.textContent = reward.title;
-    rewardDescEl.textContent = reward.desc;
-    rewardStepTextEl.textContent = `Step ${step}`;
-
-    rewardOverlay.style.display = "flex";
-  }
-
-  // 关闭礼物弹窗
-  function closeReward() {
-    rewardOverlay.style.display = "none";
-  }
-
-  // 在地图上，根据路径长度，把 25% / 75% 的位置画出 🎁 图标
-  function placeGiftMarkers() {
-    giftSteps.forEach(step => {
-      const progress = step / 100;
-      const distance = pathLength * progress;
-      const pt = path.getPointAtLength(distance);
-
-      const marker = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      marker.setAttribute("x", pt.x);
-      marker.setAttribute("y", pt.y - 16); // 往上挪一点
-      marker.setAttribute("text-anchor", "middle");
-      marker.setAttribute("font-size", "32");
-      marker.textContent = "🎁";
-
-      giftMarkersLayer.appendChild(marker);
-    });
-  }
-
-  // 初始把车放到起点，并启动粒子动画循环 + 放好礼物位置
-  updateCarPosition(false);
-  placeGiftMarkers();
-  requestAnimationFrame(updateParticles);
-
-  /* ===== Logo popup control ===== */
-  const logoBtn   = document.getElementById("logoBtn");
-  const logoModal = document.getElementById("logoModal");
-  const closeLogo = document.getElementById("closeLogo");
-
-  // 点击 logo 打开
-  logoBtn.onclick = () => {
-    logoModal.style.display = "flex";
-  };
-
-  // 点 X 关闭
-  closeLogo.onclick = () => {
+logoModal.onclick = (e) => {
+  if (e.target === logoModal) {
     logoModal.style.display = "none";
-  };
-
-  // 点背景关闭
-  logoModal.onclick = (e) => {
-    if (e.target === logoModal) {
-      logoModal.style.display = "none";
-    }
-  };
+  }
+};
 </script>
-
-
 
 </body>
 </html>
