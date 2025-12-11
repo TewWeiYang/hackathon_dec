@@ -344,94 +344,108 @@ body {
 </audio>
 
 <script>
-// 顺时针路径（不包含中间格4）
+// 顺时针路径（不包含中间格 4）
 let order = [0, 1, 2, 5, 8, 7, 6, 3];
-let current = 0;
+
+// 在 order[] 里的当前位置
+let currentIndex = 0;
+
 let timer = null;
-let speed = 80;
+let speed = 80;              // 当前速度（ms）
+const MIN_SLOW_SPEED = 320;  // 慢到可以停下来的阈值
+
 let isRunning = false;
 
-// 中奖真实格子 index（0~8）
+// 真正中奖的“格子 index”（0~8）
 let winnerCellIndex = null;
 
-// 在 order[] 内的停止位置
-let stopAtOrderIndex = null;
-
+/* 开始抽奖 */
 function startDraw() {
   if (isRunning) return;
 
+  clearTimeout(timer);
   clearWinEffect();
+
   isRunning = true;
   speed = 80;
-  current = 0;
+  currentIndex = 0;
 
-  // 随机选择一个 order[] 中的中奖路径位置
-  stopAtOrderIndex = Math.floor(Math.random() * order.length);
-
-  // 找到真正中奖的格子 index（0~8）
-  winnerCellIndex = order[stopAtOrderIndex];
+  // 从路径里的 8 个外圈格子随机一个
+  const winnerOrderIndex = Math.floor(Math.random() * order.length);
+  winnerCellIndex = order[winnerOrderIndex];  // 真实格子 index
 
   document.getElementById("statusText").textContent = "转动中…";
 
-  run();
+  spinStep();
 }
 
-function run() {
+/* 每一步旋转 */
+function spinStep() {
   const cells = document.querySelectorAll(".cell");
-  const tick = document.getElementById("tickSound");
+  const tick  = document.getElementById("tickSound");
 
-  // 清除 active
+  // 清掉之前的 active
   cells.forEach(c => c.classList.remove("active"));
 
-  // 高亮当前格子
-  let highlightCellIndex = order[current];
-  cells[highlightCellIndex].classList.add("active");
+  // 当前高亮的格子（真实格子 index）
+  const activeCellIndex = order[currentIndex];
+  cells[activeCellIndex].classList.add("active");
 
-  // 播放 tick
+  // 点击声
   try {
     tick.currentTime = 0;
     tick.play();
   } catch (e) {}
 
-  // 判断动画是否该停止
-  if (current === stopAtOrderIndex && speed > 300) {
-    // 停止在正确格子
+  // ✅ 如果已经够慢，并且当前高亮的格子就是中奖格子 → 停
+  if (speed >= MIN_SLOW_SPEED && activeCellIndex === winnerCellIndex) {
     isRunning = false;
     showWinner();
     return;
   }
 
-  // 继续旋转
-  speed += 20;
-  current = (current + 1) % order.length;
-
-  timer = setTimeout(run, speed);
+  // 否则继续下一格 + 逐渐减速
+  speed += 18;
+  currentIndex = (currentIndex + 1) % order.length;
+  timer = setTimeout(spinStep, speed);
 }
 
+/* 展示中奖结果 */
 function showWinner() {
   const cells = document.querySelectorAll(".cell");
-  const winCell = cells[winnerCellIndex];
 
+  // 先移除 active，只保留 win 效果在中奖格子
+  cells.forEach(c => c.classList.remove("active"));
+  const winCell = cells[winnerCellIndex];
   winCell.classList.add("win");
 
-  const prizeText = winCell.dataset.prize || winCell.textContent.trim();
+  const prizeText =
+    winCell.dataset.prize ||
+    winCell.textContent.trim() ||
+    "Mystery Prize";
 
-  document.getElementById("statusText").textContent = "🎉 Congrats: " + prizeText;
+  document.getElementById("statusText").textContent =
+    "🎉 Congrats: " + prizeText;
 
   try {
-    document.getElementById("winSound").play();
+    const winSound = document.getElementById("winSound");
+    winSound.currentTime = 0;
+    winSound.play();
   } catch (e) {}
 
   alert("🎉 Congrats: " + prizeText);
 }
 
+/* 清除效果 */
 function clearWinEffect() {
   document.querySelectorAll(".cell").forEach(c => {
     c.classList.remove("win", "active");
   });
-  document.getElementById("statusText").textContent = "Click SPIN to start the draw";
+  document.getElementById("statusText").textContent =
+    "Click SPIN to start the draw";
 }
-/* 返回 puzzle.html */
+
+/* 返回 puzzle 页面 */
 function goBack() {
   window.location.href = "car_puzzle_reward.html";
 }
