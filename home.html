@@ -8,6 +8,22 @@
 </head>
 <body>
 
+<nav class="eco-nav">
+  <div class="nav-logo">
+    <img src="https://i.imgur.com/RSqSrqS.png">
+    <span>EcoSave</span>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="home.html">Home</a></li>
+    <li><a href="home.html#events">Events</a></li>
+    <li><a href="#">Rewards</a></li>
+    <li><a href="#">Tips</a></li>
+    <li><a href="#">Profile</a></li>
+  </ul>
+</nav>
+
+
 <div class="app">
 
   <!-- HERO -->
@@ -21,56 +37,52 @@
   <section id="events">
     <h2>♻️ Upcoming Recycling Events</h2>
 
+    <!-- EVENT 1 -->
     <div class="event-card">
       <div class="event-info">
         <h3>Community Recycling Day</h3>
         <p>📍 Tampines Community Club</p>
         <p>📅 12 Oct 2025 • 9AM – 1PM</p>
-        <p class="desc">
-          Bring paper, plastic & electronics. Get an eco code and earn points!
-        </p>
+        <p class="desc">Bring paper, plastic & electronics. Get an eco code and earn points!</p>
       </div>
-      <button onclick="goToEventDetail()">Attend Event</button>
-
+      <button onclick="goToEventDetail(1)">Attend Event</button>
     </div>
 
+    <!-- EVENT 2 -->
     <div class="event-card">
       <div class="event-info">
         <h3>School Eco Collection Drive</h3>
         <p>📍 Republic Polytechnic</p>
         <p>📅 20 Oct 2025 • 10AM – 3PM</p>
-        <p class="desc">
-          Recycle bottles & cans. Bonus points for students!
-        </p>
+        <p class="desc">Recycle bottles & cans. Bonus points for students!</p>
       </div>
-      <button onclick="goToEventDetail()">Attend Event</button>
-
+      <button onclick="goToEventDetail(2)">Attend Event</button>
     </div>
 
+    <!-- EVENT 3 -->
     <div class="event-card">
       <div class="event-info">
         <h3>Green Market Recycling Booth</h3>
         <p>📍 Yishun Central</p>
         <p>📅 2 Nov 2025 • 4PM – 8PM</p>
-        <p class="desc">
-          Recycle on the spot and enter the iPhone lucky draw.
-        </p>
+        <p class="desc">Recycle on the spot and enter the iPhone lucky draw.</p>
       </div>
-      <button onclick="goToEventDetail()">Attend Event</button>
-
+      <button onclick="goToEventDetail(3)">Attend Event</button>
     </div>
+
   </section>
 
-  <button onclick="viewEvent()">View Details</button>
+<footer class="eco-footer">
+  <a href="home.html" class="active">🏠 Home</a>
+  <a href="home.html#events">📅 Events</a>
+  <a href="#">♻️ Recycle</a>
+  <a href="#">🎁 Rewards</a>
+  <a href="#">👤 Profile</a>
+</footer>
 
 </div>
 
-<script src="script.js"></script>
-<script>
-  function goToEventDetail() {
-    window.location.href = "events-detail.html";
-  }
-</script>
+<script src="home_and_events_detail.js"></script>
 
 </body>
 </html>

@@ -7,7 +7,7 @@ anime({
   easing: "easeOutExpo"
 });
 
-// Animate event cards staggered
+// Animate event cards
 anime({
   targets: ".event-card",
   translateY: [50, 0],
@@ -16,37 +16,45 @@ anime({
   easing: "easeOutCubic"
 });
 
+// Scroll to events section
 function scrollToEvents() {
   document.getElementById("events").scrollIntoView({ behavior: "smooth" });
 }
 
-function viewEvent(eventId) {
-  const event = document.getElementById(eventId);
-  event.scrollIntoView({ behavior: "smooth" });
+// Navigate to selected event
+function goToEventDetail(id) {
+    localStorage.setItem("eventId", id);
+    window.location.href = "events-detail.html";
 }
 
-// Page entrance animation
-anime({
-  targets: ".detail-card",
-  translateY: [40, 0],
-  opacity: [0, 1],
-  delay: anime.stagger(150),
-  easing: "easeOutCubic"
+// Back button
+function goBack() {
+  window.location.href = "home.html";
+}
+
+// NAVBAR SHRINK ON SCROLL
+window.addEventListener("scroll", function () {
+  const nav = document.getElementById("navbar");
+  if (window.scrollY > 30) {
+    nav.classList.add("scrolled");
+  } else {
+    nav.classList.remove("scrolled");
+  }
 });
 
-function goBack() {
-  window.history.back();
-}
+// FOOTER ACTIVE HIGHLIGHT
+window.addEventListener("scroll", () => {
+  const eventsSection = document.getElementById("events");
 
-// Animate embedded map on detail page
-anime({
-  targets: ".event-map",
-  scale: [0.95, 1],
-  opacity: [0, 1],
-  duration: 600,
-  easing: "easeOutExpo"
+  if (!eventsSection) return;
+
+  const top = eventsSection.getBoundingClientRect().top;
+
+  if (top < 200 && top > -500) {
+    document.getElementById("foot-events").classList.add("active");
+    document.getElementById("foot-home").classList.remove("active");
+  } else {
+    document.getElementById("foot-home").classList.add("active");
+    document.getElementById("foot-events").classList.remove("active");
+  }
 });
-
-function goBack() {
-  window.location.href = "index.html";
-}
