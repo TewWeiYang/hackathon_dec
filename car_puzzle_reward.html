@@ -247,7 +247,7 @@
   <div class="eco-right">
     <a href="home.html">Home</a>
     <a href="works.html">How It Works</a>
-    <a href="sendemail+otp.html">Login</a>
+    <a href="profile.html">Profile</a>
   </div>
 </nav>
  
@@ -389,19 +389,23 @@
  
 <script>
 /* =========================================================
-   Car Puzzle Reward Page - Clean Version
-   - No duplicate IDs
-   - No duplicate const declarations
-   - Points update will always work
+   Car Puzzle Reward Page - Persist Version
+   - Saves points / steps / puzzleCount into localStorage
+   - Restore progress after coming back from lucky draw page
 ========================================================= */
+ 
+/* ---------- STORAGE KEYS ---------- */
+const KEY_POINTS = "ecoPoints";
+const KEY_STEPS = "ecoSteps";
+const KEY_PUZZLES = "ecoPuzzleCount";
  
 /* ---------- GLOBAL POINTS ---------- */
 function getPoints() {
-  const v = parseInt(localStorage.getItem("ecoPoints") || "0", 10);
+  const v = parseInt(localStorage.getItem(KEY_POINTS) || "0", 10);
   return Number.isFinite(v) ? v : 0;
 }
 function setPoints(v) {
-  localStorage.setItem("ecoPoints", String(Math.max(0, Math.floor(Number(v) || 0))));
+  localStorage.setItem(KEY_POINTS, String(Math.max(0, Math.floor(Number(v) || 0))));
 }
 function addPoints(v) {
   const cur = getPoints();
@@ -409,10 +413,26 @@ function addPoints(v) {
   return getPoints();
 }
  
-/* ---------- STATE ---------- */
+/* ---------- STEP / PUZZLE PERSIST ---------- */
+function getSteps() {
+  const v = parseInt(localStorage.getItem(KEY_STEPS) || "0", 10);
+  return Number.isFinite(v) ? v : 0;
+}
+function setSteps(v) {
+  localStorage.setItem(KEY_STEPS, String(Math.max(0, Math.floor(Number(v) || 0))));
+}
+function getPuzzleCount() {
+  const v = parseInt(localStorage.getItem(KEY_PUZZLES) || "0", 10);
+  return Number.isFinite(v) ? v : 0;
+}
+function setPuzzleCount(v) {
+  localStorage.setItem(KEY_PUZZLES, String(Math.max(0, Math.floor(Number(v) || 0))));
+}
+ 
+/* ---------- STATE (RESTORE FROM STORAGE) ---------- */
 let points = getPoints();
-let currentStep = 0;
-let puzzleCount = 0;
+let currentStep = getSteps();          // ✅ restore
+let puzzleCount = getPuzzleCount();    // ✅ restore
 const costPerStep = 10;
  
 const giftSteps = [25, 75];
@@ -443,10 +463,21 @@ const btnExchange = document.getElementById("btnExchange");
 const btnRewardOk = document.getElementById("btnRewardOk");
  
 /* ---------- UI ---------- */
+function paintPuzzles() {
+  // ✅ Restore puzzle visuals
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById("pz" + i);
+    if (!el) continue;
+    if (i <= puzzleCount) el.classList.add("done");
+    else el.classList.remove("done");
+  }
+}
+ 
 function updateUI() {
   pointsEl.textContent = points;
   stepEl.textContent = currentStep;
   puzzleCountEl.textContent = puzzleCount;
+  paintPuzzles();
 }
  
 /* ---------- CAR & SMOKE ---------- */
@@ -525,6 +556,7 @@ function closeReward() {
  
 /* ---------- MAP MARKERS ---------- */
 function placeGiftMarkers() {
+  giftMarkersLayer.innerHTML = ""; // avoid duplicates on reload
   giftSteps.forEach(step => {
     const distance = pathLength * (step / 100);
     const pt = path.getPointAtLength(distance);
@@ -551,22 +583,30 @@ function exchangeSteps() {
     return;
   }
  
+  // Spend points
   points = addPoints(-costPerStep);
+ 
+  // Move 1 step + persist
   currentStep++;
+  setSteps(currentStep);
  
   if (giftSteps.includes(currentStep)) {
     showReward(currentStep);
   }
  
   if (currentStep === 100) {
-    puzzleCount++;
-    if (puzzleCount <= 4) {
-      document.getElementById("pz" + puzzleCount).classList.add("done");
-    }
+    // ✅ complete a loop => puzzle +1 (persist)
+    puzzleCount = Math.min(4, puzzleCount + 1);
+    setPuzzleCount(puzzleCount);
+ 
+    // reset steps (persist)
     currentStep = 0;
+    setSteps(0);
+ 
     updateUI();
     updateCarPosition(true);
  
+    // go lucky draw
     window.location.href = "lucky_draw.html";
     return;
   }
@@ -575,7 +615,7 @@ function exchangeSteps() {
   updateCarPosition(true);
 }
  
-/* ---------- LOGO MODAL (ONLY ONE) ---------- */
+/* ---------- LOGO MODAL ---------- */
 (function initLogoModal() {
   const logoBtn = document.getElementById("logoBtn");
   const logoModal = document.getElementById("logoModal");
@@ -593,6 +633,7 @@ btnCompleteTask.addEventListener("click", completeTask);
 btnExchange.addEventListener("click", exchangeSteps);
 btnRewardOk.addEventListener("click", closeReward);
  
+// restore UI & car position
 updateUI();
 updateCarPosition(false);
 placeGiftMarkers();
