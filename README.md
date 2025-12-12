@@ -17,11 +17,9 @@ Features
 Installation / Setup
 -------------------
 1. Clone or download the project folder.
-2. Open `home.html` in a web browser 
-3. Ensure internet connection for loading anime.js from CDN:
-   `<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>`
-4. Your main JS file (`home_and_events_detail.js`) should be loaded after anime.js.
-5. Local storage will store user points and last attended event.
+2. Ensure run sendemail+otp.js first before you start the website 
+3. Open `home.html` in a web browser
+4. Local storage will store user points and last attended event.
 
 Usage
 -----
