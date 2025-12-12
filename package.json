@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "anime": "^0.1.2",
     "animejs": "^4.2.2",
     "cors": "^2.8.5",
     "express": "^5.2.1",
