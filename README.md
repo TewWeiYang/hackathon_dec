@@ -13,8 +13,7 @@ Features
 4. Lucky Draw system for redeeming points and winning prizes.
 5. Track points and progress via local storage.
 6. Smooth UI animations (powered by anime.js) and responsive scrolling features.
-7. Navigation helpers: scroll to events section, go to event details, back button, navbar shrink on scroll, footer highlight.
-
+7. Navigation helpers: scroll to events section, go to event details, navbar shrink on scroll.
 Installation / Setup
 -------------------
 1. Clone or download the project folder.
